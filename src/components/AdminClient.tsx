@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import PanelNav from './PanelNav'
+import AppShell from './AppShell'
 import ScheduleCalendar from './ScheduleCalendar'
 import type { UserRecord, UserRole } from '@/lib/types'
 
@@ -100,8 +100,11 @@ export default function AdminClient({ userName, currentUserId }: Props) {
       : 'text-gray-400 border-white/10 hover:border-white/20 hover:text-white'
 
   return (
-    <div className="min-h-screen px-4 py-8 max-w-4xl mx-auto">
-      <PanelNav userName={userName} active="admin" isAdmin />
+    <AppShell userName={userName} isAdmin>
+      <header className="mb-6">
+        <p className="text-xs text-gray-500 uppercase tracking-widest mb-1">Management</p>
+        <h1 className="text-2xl font-semibold">Admin Panel</h1>
+      </header>
 
       <div className="flex gap-2 mb-6">
         <button
@@ -210,6 +213,6 @@ export default function AdminClient({ userName, currentUserId }: Props) {
           </div>
         </>
       )}
-    </div>
+    </AppShell>
   )
 }

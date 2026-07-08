@@ -5,7 +5,12 @@ import { signToken, COOKIE_NAME, normalizeRole } from '@/lib/auth'
 
 export async function POST(req: NextRequest) {
   try {
-    const { name, email, password } = await req.json()
+    const body = await req.json()
+    const { name, email, password, role: requestedRole } = body
+
+    if (requestedRole === 'admin') {
+      return NextResponse.json({ error: 'Admin accounts cannot be created via registration.' }, { status: 403 })
+    }
 
     if (!name || !email || !password) {
       return NextResponse.json({ error: 'All fields are required.' }, { status: 400 })

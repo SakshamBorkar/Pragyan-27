@@ -99,7 +99,11 @@ async function main() {
     throw lastError ?? new Error('Could not connect to database')
   }
 
-  const sql = readSql('migrate-all.sql')
+  const sql = [
+    readSql('migrate-all.sql'),
+    readSql('add-completion.sql'),
+    readSql('add-assigned-by.sql'),
+  ].filter(Boolean).join('\n\n')
   if (!sql) throw new Error('migrate-all.sql is empty')
 
   console.log('Running migrate-all.sql…')

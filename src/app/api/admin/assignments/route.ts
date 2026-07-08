@@ -1,8 +1,79 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { fetchAdminLookup, mapAssigner, resolveAssigner } from '@/lib/assignments'
 import { getSession, isAdmin } from '@/lib/auth'
 import { supabase } from '@/lib/db'
+import type { AdminSummary, AssignedUserStatus } from '@/lib/types'
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/
+
+const ASSIGNMENT_SELECT = `
+  id,
+  user_id,
+  assigned_date,
+  created_at,
+  completed_at,
+  completed_pi_number,
+  assigned_by,
+  users!user_id(id, name, email),
+  assigner:users!assigned_by(id, name, email)
+`
+
+
+type AssignmentRow = {
+  id: number
+  user_id: number
+  assigned_date: string
+  created_at: string
+  completed_at: string | null
+  completed_pi_number: number | null
+  assigned_by: number | null
+  users: unknown
+  assigner: unknown
+}
+
+function mapUserStatus(row: AssignmentRow, adminLookup: Map<number, AdminSummary>): AssignedUserStatus | null {
+  const user = row.users as { id: number; name: string; email: string } | null
+  if (!user) return null
+
+  const userId = typeof user.id === 'number' ? user.id : Number(user.id)
+
+  return {
+    id: userId,
+    name: user.name,
+    email: user.email,
+    completed: Boolean(row.completed_at),
+    completedAt: row.completed_at,
+    completedPiNumber: row.completed_pi_number === 1 || row.completed_pi_number === 2
+      ? row.completed_pi_number
+      : null,
+    allottedAt: row.created_at,
+    allottedBy: resolveAssigner(row.assigner, row.assigned_by, adminLookup),
+  }
+}
+
+async function loadMonthAssignments(start: string, end: string) {
+  const { data: assignments, error } = await supabase
+    .from('pi_assignments')
+    .select(ASSIGNMENT_SELECT)
+    .gte('assigned_date', start)
+    .lte('assigned_date', end)
+    .order('assigned_date', { ascending: true })
+
+  if (error) throw error
+
+  const rows = (assignments ?? []) as AssignmentRow[]
+  const missingAdminIds = [
+    ...new Set(
+      rows
+        .filter(r => !mapAssigner(r.assigner) && r.assigned_by != null)
+        .map(r => Number(r.assigned_by))
+        .filter(Number.isFinite),
+    ),
+  ]
+
+  const adminLookup = await fetchAdminLookup(supabase, missingAdminIds)
+  return { rows, adminLookup }
+}
 
 export async function GET(req: NextRequest) {
   const session = await getSession()
@@ -20,27 +91,30 @@ export async function GET(req: NextRequest) {
   const endDay = new Date(year, month, 0).getDate()
   const end = `${year}-${String(month).padStart(2, '0')}-${String(endDay).padStart(2, '0')}`
 
-  const { data: assignments, error } = await supabase
-    .from('pi_assignments')
-    .select('id, user_id, assigned_date, users(id, name, email)')
-    .gte('assigned_date', start)
-    .lte('assigned_date', end)
-    .order('assigned_date', { ascending: true })
-
-  if (error) {
+  let rows: AssignmentRow[]
+  let adminLookup: Map<number, AdminSummary>
+  try {
+    ;({ rows, adminLookup } = await loadMonthAssignments(start, end))
+  } catch (error) {
     console.error(error)
     return NextResponse.json({ error: 'Failed to load assignments.' }, { status: 500 })
   }
 
-  const byDate: Record<string, { userIds: number[]; users: { id: number; name: string; email: string }[] }> = {}
+  const byDate: Record<string, {
+    userIds: number[]
+    users: AssignedUserStatus[]
+    completedCount: number
+  }> = {}
 
-  for (const row of assignments ?? []) {
-    const date = row.assigned_date as string
-    const user = row.users as { id: number; name: string; email: string } | null
-    if (!user) continue
-    if (!byDate[date]) byDate[date] = { userIds: [], users: [] }
-    byDate[date].userIds.push(user.id)
-    byDate[date].users.push(user)
+  for (const row of rows) {
+    const date = row.assigned_date
+    const status = mapUserStatus(row, adminLookup)
+    if (!status) continue
+
+    if (!byDate[date]) byDate[date] = { userIds: [], users: [], completedCount: 0 }
+    byDate[date].userIds.push(status.id)
+    byDate[date].users.push(status)
+    if (status.completed) byDate[date].completedCount++
   }
 
   return NextResponse.json({ assignments: byDate })
@@ -79,6 +153,15 @@ export async function PUT(req: NextRequest) {
     }
   }
 
+  const { data: existingRows } = await supabase
+    .from('pi_assignments')
+    .select('user_id, completed_at, completed_pi_number, assigned_by, created_at')
+    .eq('assigned_date', date)
+
+  const existingMap = new Map(
+    (existingRows ?? []).map(r => [r.user_id as number, r])
+  )
+
   const { error: deleteError } = await supabase
     .from('pi_assignments')
     .delete()
@@ -90,7 +173,18 @@ export async function PUT(req: NextRequest) {
   }
 
   if (uniqueIds.length > 0) {
-    const rows = uniqueIds.map(userId => ({ user_id: userId, assigned_date: date }))
+    const rows = uniqueIds.map(userId => {
+      const prev = existingMap.get(userId)
+      return {
+        user_id: userId,
+        assigned_date: date,
+        assigned_by: (prev?.assigned_by as number | null) ?? session.userId,
+        completed_at: (prev?.completed_at as string | null) ?? null,
+        completed_pi_number: (prev?.completed_pi_number as number | null) ?? null,
+        ...(prev?.created_at ? { created_at: prev.created_at as string } : {}),
+      }
+    })
+
     const { error: insertError } = await supabase.from('pi_assignments').insert(rows)
 
     if (insertError) {
@@ -101,17 +195,33 @@ export async function PUT(req: NextRequest) {
 
   const { data: saved, error: fetchError } = await supabase
     .from('pi_assignments')
-    .select('id, user_id, assigned_date, users(id, name, email)')
+    .select(ASSIGNMENT_SELECT)
     .eq('assigned_date', date)
 
   if (fetchError) {
     console.error(fetchError)
-    return NextResponse.json({ ok: true, date, userIds: uniqueIds, users: [] })
+    return NextResponse.json({ ok: true, date, userIds: uniqueIds, users: [], completedCount: 0 })
   }
 
-  const users = (saved ?? [])
-    .map(r => r.users as { id: number; name: string; email: string } | null)
-    .filter(Boolean) as { id: number; name: string; email: string }[]
+  const savedRows = (saved ?? []) as AssignmentRow[]
+  const missingAdminIds = [
+    ...new Set(
+      savedRows
+        .filter(r => !mapAssigner(r.assigner) && r.assigned_by != null)
+        .map(r => Number(r.assigned_by))
+        .filter(Number.isFinite),
+    ),
+  ]
+  const adminLookup = await fetchAdminLookup(supabase, missingAdminIds)
 
-  return NextResponse.json({ date, userIds: uniqueIds, users })
+  const users = savedRows
+    .map(r => mapUserStatus(r, adminLookup))
+    .filter(Boolean) as AssignedUserStatus[]
+
+  return NextResponse.json({
+    date,
+    userIds: uniqueIds,
+    users,
+    completedCount: users.filter(u => u.completed).length,
+  })
 }

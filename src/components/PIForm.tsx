@@ -3,14 +3,13 @@
 import { useEffect, useState } from 'react'
 
 import { formatAllottedDate } from '@/lib/types'
-import AssignedDatesPanel from './AssignedDatesPanel'
 
 interface Props {
   piNumber: 1 | 2
-  onBack: () => void
-  userName?: string
+  onBack?: () => void
   assignedDates?: string[]
   restrictToAssignedDates?: boolean
+  embedded?: boolean
 }
 
 const SPARKLES = '\u2728'
@@ -71,9 +70,9 @@ Do acknowledge with a ${ROCKET} to confirm your PI slot`
 export default function PIForm({
   piNumber,
   onBack,
-  userName = 'there',
   assignedDates = [],
   restrictToAssignedDates = false,
+  embedded = false,
 }: Props) {
   const [phone, setPhone] = useState('')
   const [date, setDate] = useState(restrictToAssignedDates && assignedDates.length === 1 ? assignedDates[0] : '')
@@ -119,32 +118,11 @@ export default function PIForm({
     }
 
     window.open(buildWhatsAppUrl(phone, normalized), '_blank', 'noopener,noreferrer')
-    setNotice('Opened WhatsApp Web. Message copied — paste with Ctrl+V if emojis look wrong.')
+    setNotice('Opened WhatsApp Web. Mark scheduling as completed in the panel on the right when done.')
   }
 
-  return (
-    <div className="min-h-screen px-4 py-8 max-w-lg mx-auto">
-      <button
-        onClick={onBack}
-        className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors mb-6"
-      >
-        ← Back
-      </button>
-
-      <h1 className="text-xl font-semibold mb-1">PI‑{piNumber} Scheduler</h1>
-      <p className="text-sm text-gray-400 mb-6">
-        Fill in the slot details — the WhatsApp message will be pre-filled for you.
-      </p>
-
-      {restrictToAssignedDates && assignedDates.length > 0 && (
-        <AssignedDatesPanel
-          userName={userName}
-          dates={assignedDates}
-          compact
-        />
-      )}
-
-      <div className="bg-[#1a1a2e] border border-white/10 rounded-2xl p-6 space-y-4">
+  const formCard = (
+    <div className="bg-[#1a1a2e] border border-white/10 rounded-2xl p-6 space-y-4">
         <div>
           <label className="block text-xs text-gray-400 mb-1.5">
             Recipient phone number <span className="text-gray-600">(with country code)</span>
@@ -168,7 +146,7 @@ export default function PIForm({
             >
               <option value="">Select your allotted date</option>
               {assignedDates.map(d => (
-                <option key={d} value={d}>{formatAllottedDate(d)} — Allotted</option>
+                <option key={d} value={d}>{formatAllottedDate(d)}</option>
               ))}
             </select>
           ) : (
@@ -202,7 +180,6 @@ export default function PIForm({
           />
         </div>
 
-        {/* Editable message — opens as plain text in WhatsApp compose box */}
         <div>
           <p className="text-xs text-gray-500 mb-2">Message (editable before sending)</p>
           <textarea
@@ -226,7 +203,28 @@ export default function PIForm({
           </svg>
           Open in WhatsApp
         </button>
-      </div>
+    </div>
+  )
+
+  if (embedded) return formCard
+
+  return (
+    <div>
+      {onBack && (
+        <button
+          onClick={onBack}
+          className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors mb-6"
+        >
+          ← Back
+        </button>
+      )}
+
+      <h1 className="text-xl font-semibold mb-1">PI‑{piNumber} Scheduler</h1>
+      <p className="text-sm text-gray-400 mb-6">
+        Fill in the slot details — the WhatsApp message will be pre-filled for you.
+      </p>
+
+      {formCard}
     </div>
   )
 }

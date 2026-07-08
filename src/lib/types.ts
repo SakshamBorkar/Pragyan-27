@@ -14,7 +14,42 @@ export interface PIAssignment {
   user_id: number
   assigned_date: string
   created_at: string
+  completed_at: string | null
+  completed_pi_number: 1 | 2 | null
   user?: Pick<UserRecord, 'id' | 'name' | 'email'>
+}
+
+export interface UserAssignment {
+  date: string
+  completed: boolean
+  completedAt: string | null
+  completedPiNumber: 1 | 2 | null
+  allottedAt: string | null
+  allottedBy: { id: number; name: string; email: string } | null
+}
+
+export interface AssignedUserStatus {
+  id: number
+  name: string
+  email: string
+  completed: boolean
+  completedAt: string | null
+  completedPiNumber: 1 | 2 | null
+  allottedAt: string | null
+  allottedBy: { id: number; name: string; email: string } | null
+}
+
+export interface AdminSummary {
+  id: number
+  name: string
+  email: string
+}
+
+export interface AllotmentUser {
+  id: number
+  name: string
+  completed: boolean
+  completedPiNumber: 1 | 2 | null
 }
 
 export interface DateAssignments {
@@ -57,6 +92,17 @@ export function formatAllottedDate(dateKey: string): string {
 
 export function formatWeekday(dateKey: string): string {
   return new Date(`${dateKey}T00:00:00`).toLocaleDateString('en-IN', { weekday: 'long' })
+}
+
+export function formatDateTime(iso: string | null): string {
+  if (!iso) return '—'
+  return new Date(iso).toLocaleString('en-IN', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
 }
 
 export function toDateKey(year: number, month: number, day: number): string {

@@ -42,10 +42,14 @@ export default function RegisterPage() {
             ✨ Pragyan Events
           </span>
           <h1 className="text-2xl font-semibold">Create account</h1>
-          <p className="text-gray-400 text-sm mt-1">Join the PI scheduling team</p>
+          <p className="text-gray-400 text-sm mt-1">Register as a team member (User)</p>
         </div>
 
         <div className="bg-[#1a1a2e] border border-white/10 rounded-2xl p-6">
+          <p className="text-xs text-gray-500 mb-4 leading-relaxed">
+            New accounts are created as <span className="text-gray-300">User</span> only.
+            Admin access must be granted by an existing admin.
+          </p>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-xs text-gray-400 mb-1.5">Name</label>
@@ -86,7 +90,7 @@ export default function RegisterPage() {
               disabled={loading}
               className="w-full bg-[#e8c97d] text-[#0f0f1a] font-semibold rounded-lg py-2.5 text-sm hover:bg-[#f0d898] transition-colors disabled:opacity-60"
             >
-              {loading ? 'Creating account…' : 'Create account'}
+              {loading ? 'Creating account…' : 'Register as User'}
             </button>
           </form>
           <p className="text-center text-xs text-gray-500 mt-4">

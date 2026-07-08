@@ -1,12 +1,13 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import type { UserRecord } from '@/lib/types'
-import { formatDisplayDate, toDateKey } from '@/lib/types'
+import type { AssignedUserStatus, UserRecord } from '@/lib/types'
+import { formatDisplayDate, toDateKey, formatDateTime } from '@/lib/types'
 
 interface DayAssignments {
   userIds: number[]
-  users: Pick<UserRecord, 'id' | 'name' | 'email'>[]
+  users: AssignedUserStatus[]
+  completedCount: number
 }
 
 interface Props {
@@ -106,7 +107,11 @@ export default function ScheduleCalendar({ users }: Props) {
       }
       setAssignments(prev => ({
         ...prev,
-        [selectedDate]: { userIds: data.userIds, users: data.users },
+        [selectedDate]: {
+          userIds: data.userIds,
+          users: data.users,
+          completedCount: data.completedCount ?? 0,
+        },
       }))
       setNotice(`Saved assignments for ${formatDisplayDate(selectedDate)}.`)
     } catch {
@@ -164,7 +169,9 @@ export default function ScheduleCalendar({ users }: Props) {
           <div className="grid grid-cols-7 gap-2">
             {calendarCells.map((cell, i) => {
               if (!cell) return <div key={`empty-${i}`} />
-              const count = assignments[cell.dateKey]?.userIds.length ?? 0
+              const dayData = assignments[cell.dateKey]
+              const count = dayData?.userIds.length ?? 0
+              const done = dayData?.completedCount ?? 0
               const isToday = cell.dateKey === todayKey
               const isSelected = cell.dateKey === selectedDate
 
@@ -182,10 +189,15 @@ export default function ScheduleCalendar({ users }: Props) {
                 >
                   <div className="text-sm font-medium">{cell.day}</div>
                   {count > 0 && (
-                    <div className="mt-2">
+                    <div className="mt-2 space-y-1">
                       <span className="inline-block text-[10px] bg-[#e8c97d22] text-[#e8c97d] border border-[#e8c97d44] rounded-full px-2 py-0.5">
                         {count} user{count !== 1 ? 's' : ''}
                       </span>
+                      {done > 0 && (
+                        <span className="block text-[10px] bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 rounded-full px-2 py-0.5 w-fit">
+                          {done}/{count} done
+                        </span>
+                      )}
                     </div>
                   )}
                 </button>
@@ -214,25 +226,64 @@ export default function ScheduleCalendar({ users }: Props) {
             {schedulableUsers.length === 0 ? (
               <p className="text-sm text-gray-500">No regular users available to assign.</p>
             ) : (
-              <div className="space-y-2 mb-4">
-                {schedulableUsers.map(user => (
-                  <label
-                    key={user.id}
-                    className="flex items-center gap-3 bg-[#0f0f1a] border border-white/10 rounded-xl px-4 py-3 cursor-pointer hover:border-[#e8c97d44]"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selectedUserIds.includes(user.id)}
-                      onChange={() => toggleUser(user.id)}
-                      className="accent-[#e8c97d]"
-                    />
-                    <div>
-                      <div className="text-sm font-medium">{user.name}</div>
-                      <div className="text-xs text-gray-500">{user.email}</div>
-                    </div>
-                  </label>
-                ))}
-              </div>
+              <>
+                {selectedDate && assignments[selectedDate] && assignments[selectedDate].users.some(u => selectedUserIds.includes(u.id)) && (
+                  <div className="mb-4 space-y-2">
+                    <p className="text-xs text-gray-500 uppercase tracking-widest">Assignment details</p>
+                    {assignments[selectedDate].users
+                      .filter(u => selectedUserIds.includes(u.id))
+                      .map(user => (
+                        <div
+                          key={user.id}
+                          className={`rounded-xl px-3 py-3 text-xs ${
+                            user.completed
+                              ? 'bg-emerald-500/10 border border-emerald-500/30'
+                              : 'bg-[#0f0f1a] border border-white/10'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="font-medium text-white">{user.name}</span>
+                            <span className={user.completed ? 'text-emerald-400' : 'text-gray-400'}>
+                              {user.completed
+                                ? `Completed${user.completedPiNumber ? ` · PI-${user.completedPiNumber}` : ''}`
+                                : 'Pending'}
+                            </span>
+                          </div>
+                          <div className="space-y-1 text-gray-500">
+                            <p>Allotted by: <span className="text-gray-300">{user.allottedBy?.name ?? '—'}</span></p>
+                            <p>Allotted on: <span className="text-gray-300">{formatDateTime(user.allottedAt)}</span></p>
+                            {user.completed && (
+                              <p>Completed on: <span className="text-emerald-400">{formatDateTime(user.completedAt)}</span></p>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                )}
+
+                <div className="space-y-2 mb-4">
+                  {schedulableUsers.map(user => (
+                    <label
+                      key={user.id}
+                      className="flex items-center gap-3 bg-[#0f0f1a] border border-white/10 rounded-xl px-4 py-3 cursor-pointer hover:border-[#e8c97d44]"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedUserIds.includes(user.id)}
+                        onChange={() => toggleUser(user.id)}
+                        className="accent-[#e8c97d]"
+                      />
+                      <div className="flex-1">
+                        <div className="text-sm font-medium">{user.name}</div>
+                        <div className="text-xs text-gray-500">{user.email}</div>
+                      </div>
+                      {assignments[selectedDate]?.users.find(u => u.id === user.id)?.completed && (
+                        <span className="text-[10px] text-emerald-400">Done</span>
+                      )}
+                    </label>
+                  ))}
+                </div>
+              </>
             )}
 
             {error && <p className="text-red-400 text-xs mb-3">{error}</p>}
