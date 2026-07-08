@@ -48,14 +48,12 @@ async function loadAssignmentsForUser(userId: number, todayKey: string) {
   if (error) throw error
 
   const typedRows = (rows ?? []) as AssignmentRow[]
-  const missingAdminIds = [
-    ...new Set(
-      typedRows
-        .filter(r => !mapAssigner(r.assigner) && r.assigned_by != null)
-        .map(r => Number(r.assigned_by))
-        .filter(Number.isFinite),
-    ),
-  ]
+  const missingAdminIds = Array.from(new Set(
+    typedRows
+      .filter(r => !mapAssigner(r.assigner) && r.assigned_by != null)
+      .map(r => Number(r.assigned_by))
+      .filter(Number.isFinite),
+  ))
 
   const adminLookup = await fetchAdminLookup(supabase, missingAdminIds)
   return typedRows.map(r => mapAssignment(r, adminLookup))

@@ -62,14 +62,12 @@ async function loadMonthAssignments(start: string, end: string) {
   if (error) throw error
 
   const rows = (assignments ?? []) as AssignmentRow[]
-  const missingAdminIds = [
-    ...new Set(
-      rows
-        .filter(r => !mapAssigner(r.assigner) && r.assigned_by != null)
-        .map(r => Number(r.assigned_by))
-        .filter(Number.isFinite),
-    ),
-  ]
+  const missingAdminIds = Array.from(new Set(
+    rows
+      .filter(r => !mapAssigner(r.assigner) && r.assigned_by != null)
+      .map(r => Number(r.assigned_by))
+      .filter(Number.isFinite),
+  ))
 
   const adminLookup = await fetchAdminLookup(supabase, missingAdminIds)
   return { rows, adminLookup }
@@ -134,7 +132,7 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ error: 'userIds array required.' }, { status: 400 })
   }
 
-  const uniqueIds = [...new Set(userIds.filter(id => Number.isInteger(id) && id > 0))]
+  const uniqueIds = Array.from(new Set(userIds.filter(id => Number.isInteger(id) && id > 0)))
 
   if (uniqueIds.length > 0) {
     const { data: users, error: usersError } = await supabase
@@ -204,14 +202,12 @@ export async function PUT(req: NextRequest) {
   }
 
   const savedRows = (saved ?? []) as AssignmentRow[]
-  const missingAdminIds = [
-    ...new Set(
-      savedRows
-        .filter(r => !mapAssigner(r.assigner) && r.assigned_by != null)
-        .map(r => Number(r.assigned_by))
-        .filter(Number.isFinite),
-    ),
-  ]
+  const missingAdminIds = Array.from(new Set(
+    savedRows
+      .filter(r => !mapAssigner(r.assigner) && r.assigned_by != null)
+      .map(r => Number(r.assigned_by))
+      .filter(Number.isFinite),
+  ))
   const adminLookup = await fetchAdminLookup(supabase, missingAdminIds)
 
   const users = savedRows
