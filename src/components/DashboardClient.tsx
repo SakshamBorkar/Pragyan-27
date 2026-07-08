@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import PIForm from './PIForm'
 import PanelNav from './PanelNav'
-import { formatDisplayDate } from '@/lib/types'
+import AssignedDatesPanel from './AssignedDatesPanel'
 
 interface Props {
   userName: string
@@ -34,6 +34,7 @@ export default function DashboardClient({ userName, isAdmin = false }: Props) {
       <PIForm
         piNumber={activePI}
         onBack={() => setActivePI(null)}
+        userName={userName}
         assignedDates={isAdmin ? undefined : assignedDates}
         restrictToAssignedDates={!isAdmin}
       />
@@ -47,33 +48,19 @@ export default function DashboardClient({ userName, isAdmin = false }: Props) {
       <PanelNav userName={userName} active="dashboard" isAdmin={isAdmin} />
 
       {!isAdmin && (
-        <div className="bg-[#1a1a2e] border border-white/10 rounded-2xl p-5 mb-6">
-          <p className="text-xs text-gray-500 uppercase tracking-widest mb-2">Your assigned dates</p>
-          {loadingDates ? (
-            <p className="text-sm text-gray-500">Loading…</p>
-          ) : assignedDates.length === 0 ? (
-            <p className="text-sm text-gray-400">
-              No dates assigned yet. Ask an admin to assign you on the schedule calendar.
-            </p>
-          ) : (
-            <div className="flex flex-wrap gap-2">
-              {assignedDates.map(date => (
-                <span
-                  key={date}
-                  className="text-xs bg-[#e8c97d22] text-[#e8c97d] border border-[#e8c97d44] rounded-full px-3 py-1"
-                >
-                  {formatDisplayDate(date)}
-                </span>
-              ))}
-            </div>
-          )}
-        </div>
+        <AssignedDatesPanel
+          userName={userName}
+          dates={assignedDates}
+          loading={loadingDates}
+        />
       )}
 
       <p className="text-gray-400 text-sm mb-6">
         {canSchedule
-          ? 'Select the interview round to send a slot confirmation.'
-          : 'You can schedule PI slots once an admin assigns you a date.'}
+          ? assignedDates.length > 0 && !isAdmin
+            ? 'Pick a PI round below to send slot confirmations for your allotted date(s).'
+            : 'Select the interview round to send a slot confirmation.'
+          : 'You can schedule PI slots once an admin allots you a date.'}
       </p>
 
       <div className="grid grid-cols-2 gap-4">

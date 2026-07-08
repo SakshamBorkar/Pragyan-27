@@ -4,4 +4,4 @@ ALTER TABLE users
   CHECK (role IN ('user', 'admin'));
 
 -- Promote your account to admin (replace with your email):
--- UPDATE users SET role = 'admin' WHERE email = 'you@example.com';
+-- UPDATE users SET role = 'admin' WHERE email = 'sakshamborkar23@gmail.com';

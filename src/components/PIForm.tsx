@@ -2,11 +2,13 @@
 
 import { useEffect, useState } from 'react'
 
-import { formatDisplayDate } from '@/lib/types'
+import { formatAllottedDate } from '@/lib/types'
+import AssignedDatesPanel from './AssignedDatesPanel'
 
 interface Props {
   piNumber: 1 | 2
   onBack: () => void
+  userName?: string
   assignedDates?: string[]
   restrictToAssignedDates?: boolean
 }
@@ -69,6 +71,7 @@ Do acknowledge with a ${ROCKET} to confirm your PI slot`
 export default function PIForm({
   piNumber,
   onBack,
+  userName = 'there',
   assignedDates = [],
   restrictToAssignedDates = false,
 }: Props) {
@@ -133,6 +136,14 @@ export default function PIForm({
         Fill in the slot details — the WhatsApp message will be pre-filled for you.
       </p>
 
+      {restrictToAssignedDates && assignedDates.length > 0 && (
+        <AssignedDatesPanel
+          userName={userName}
+          dates={assignedDates}
+          compact
+        />
+      )}
+
       <div className="bg-[#1a1a2e] border border-white/10 rounded-2xl p-6 space-y-4">
         <div>
           <label className="block text-xs text-gray-400 mb-1.5">
@@ -148,16 +159,16 @@ export default function PIForm({
         </div>
 
         <div>
-          <label className="block text-xs text-gray-400 mb-1.5">Date</label>
+          <label className="block text-xs text-gray-400 mb-1.5">Allotted date</label>
           {restrictToAssignedDates ? (
             <select
               value={date}
               onChange={e => setDate(e.target.value)}
               className="w-full bg-[#0f0f1a] border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-[#e8c97d] transition-colors"
             >
-              <option value="">Select assigned date</option>
+              <option value="">Select your allotted date</option>
               {assignedDates.map(d => (
-                <option key={d} value={d}>{formatDisplayDate(d)}</option>
+                <option key={d} value={d}>{formatAllottedDate(d)} — Allotted</option>
               ))}
             </select>
           ) : (
