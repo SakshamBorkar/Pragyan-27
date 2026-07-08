@@ -8,6 +8,7 @@
 //     name       TEXT        NOT NULL,
 //     email      TEXT UNIQUE NOT NULL,
 //     password   TEXT        NOT NULL,
+//     role       TEXT        NOT NULL DEFAULT 'user' CHECK (role IN ('user', 'admin')),
 //     created_at TIMESTAMPTZ DEFAULT NOW()
 //   );
 
@@ -30,6 +31,7 @@ async function migrate() {
         name       TEXT        NOT NULL,
         email      TEXT UNIQUE NOT NULL,
         password   TEXT        NOT NULL,
+        role       TEXT        NOT NULL DEFAULT 'user' CHECK (role IN ('user', 'admin')),
         created_at TIMESTAMPTZ DEFAULT NOW()
       );
     `

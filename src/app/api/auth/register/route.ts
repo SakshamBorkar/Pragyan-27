@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { supabase } from '@/lib/db'
-import { signToken, COOKIE_NAME } from '@/lib/auth'
+import { signToken, COOKIE_NAME, normalizeRole } from '@/lib/auth'
 
 export async function POST(req: NextRequest) {
   try {
@@ -28,8 +28,8 @@ export async function POST(req: NextRequest) {
 
     const { data: user, error } = await supabase
       .from('users')
-      .insert({ name, email: email.toLowerCase(), password: hashed })
-      .select('id, name, email')
+      .insert({ name, email: email.toLowerCase(), password: hashed, role: 'user' })
+      .select('id, name, email, role')
       .single()
 
     if (error || !user) {
@@ -37,9 +37,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Failed to create account.' }, { status: 500 })
     }
 
-    const token = await signToken({ userId: user.id, name: user.name, email: user.email })
+    const role = normalizeRole(user.role)
+    const token = await signToken({ userId: user.id, name: user.name, email: user.email, role })
 
-    const res = NextResponse.json({ user: { name: user.name, email: user.email } })
+    const res = NextResponse.json({ user: { name: user.name, email: user.email, role } })
     res.cookies.set(COOKIE_NAME, token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',

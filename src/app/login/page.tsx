@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { homePathForRole, type UserRole } from '@/lib/types'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -23,7 +24,8 @@ export default function LoginPage() {
       })
       const data = await res.json()
       if (!res.ok) { setError(data.error); return }
-      router.push('/dashboard')
+      const role = (data.user?.role ?? 'user') as UserRole
+      router.push(homePathForRole(role))
       router.refresh()
     } catch {
       setError('Something went wrong. Try again.')

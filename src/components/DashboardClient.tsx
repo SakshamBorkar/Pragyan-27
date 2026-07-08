@@ -1,29 +1,16 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import PIForm from './PIForm'
+import PanelNav from './PanelNav'
 
 interface Props {
   userName: string
+  isAdmin?: boolean
 }
 
-export default function DashboardClient({ userName }: Props) {
-  const router = useRouter()
+export default function DashboardClient({ userName, isAdmin = false }: Props) {
   const [activePI, setActivePI] = useState<1 | 2 | null>(null)
-
-  const initials = userName
-    .split(' ')
-    .map(w => w[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2)
-
-  async function handleLogout() {
-    await fetch('/api/auth/logout', { method: 'POST' })
-    router.push('/login')
-    router.refresh()
-  }
 
   if (activePI) {
     return (
@@ -36,23 +23,7 @@ export default function DashboardClient({ userName }: Props) {
 
   return (
     <div className="min-h-screen px-4 py-8 max-w-lg mx-auto">
-      <div className="flex items-center justify-between mb-10">
-        <div>
-          <p className="text-xs text-gray-500 uppercase tracking-widest mb-0.5">Pragyan Events</p>
-          <h1 className="text-xl font-semibold">PI Scheduler</h1>
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-[#1a1a2e] border border-[#e8c97d44] flex items-center justify-center text-[#e8c97d] text-xs font-semibold">
-            {initials}
-          </div>
-          <button
-            onClick={handleLogout}
-            className="text-xs text-gray-400 border border-white/10 rounded-lg px-3 py-1.5 hover:border-white/20 transition-colors"
-          >
-            Sign out
-          </button>
-        </div>
-      </div>
+      <PanelNav userName={userName} active="dashboard" isAdmin={isAdmin} />
 
       <p className="text-gray-400 text-sm mb-6">
         Select the interview round to send a slot confirmation.
