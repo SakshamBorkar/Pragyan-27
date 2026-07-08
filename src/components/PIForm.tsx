@@ -2,9 +2,13 @@
 
 import { useEffect, useState } from 'react'
 
+import { formatDisplayDate } from '@/lib/types'
+
 interface Props {
   piNumber: 1 | 2
   onBack: () => void
+  assignedDates?: string[]
+  restrictToAssignedDates?: boolean
 }
 
 const SPARKLES = '\u2728'
@@ -62,9 +66,14 @@ Do visit the Pragyan's website and social media handles to get a head start and 
 Do acknowledge with a ${ROCKET} to confirm your PI slot`
 }
 
-export default function PIForm({ piNumber, onBack }: Props) {
+export default function PIForm({
+  piNumber,
+  onBack,
+  assignedDates = [],
+  restrictToAssignedDates = false,
+}: Props) {
   const [phone, setPhone] = useState('')
-  const [date, setDate] = useState('')
+  const [date, setDate] = useState(restrictToAssignedDates && assignedDates.length === 1 ? assignedDates[0] : '')
   const [time, setTime] = useState('')
   const [venue, setVenue] = useState('')
   const [message, setMessage] = useState('')
@@ -72,6 +81,12 @@ export default function PIForm({ piNumber, onBack }: Props) {
   const [notice, setNotice] = useState('')
 
   const isPreviewReady = date && time && venue
+
+  useEffect(() => {
+    if (restrictToAssignedDates && assignedDates.length === 1) {
+      setDate(assignedDates[0])
+    }
+  }, [assignedDates, restrictToAssignedDates])
 
   useEffect(() => {
     if (isPreviewReady) {
@@ -84,6 +99,10 @@ export default function PIForm({ piNumber, onBack }: Props) {
     setNotice('')
     if (!phone.trim()) { setError('Enter recipient phone number.'); return }
     if (!date) { setError('Select a date.'); return }
+    if (restrictToAssignedDates && !assignedDates.includes(date)) {
+      setError('You can only schedule on dates assigned to you.')
+      return
+    }
     if (!time) { setError('Select a time.'); return }
     if (!venue.trim()) { setError('Enter venue.'); return }
     if (!message.trim()) { setError('Message cannot be empty.'); return }
@@ -130,12 +149,25 @@ export default function PIForm({ piNumber, onBack }: Props) {
 
         <div>
           <label className="block text-xs text-gray-400 mb-1.5">Date</label>
-          <input
-            type="date"
-            value={date}
-            onChange={e => setDate(e.target.value)}
-            className="w-full bg-[#0f0f1a] border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-[#e8c97d] transition-colors [color-scheme:dark]"
-          />
+          {restrictToAssignedDates ? (
+            <select
+              value={date}
+              onChange={e => setDate(e.target.value)}
+              className="w-full bg-[#0f0f1a] border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-[#e8c97d] transition-colors"
+            >
+              <option value="">Select assigned date</option>
+              {assignedDates.map(d => (
+                <option key={d} value={d}>{formatDisplayDate(d)}</option>
+              ))}
+            </select>
+          ) : (
+            <input
+              type="date"
+              value={date}
+              onChange={e => setDate(e.target.value)}
+              className="w-full bg-[#0f0f1a] border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-[#e8c97d] transition-colors [color-scheme:dark]"
+            />
+          )}
         </div>
 
         <div>

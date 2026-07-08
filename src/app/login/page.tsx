@@ -3,12 +3,13 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { homePathForRole, type UserRole } from '@/lib/types'
+import type { LoginAs } from '@/lib/types'
 
 export default function LoginPage() {
   const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [loginAs, setLoginAs] = useState<LoginAs>('user')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -20,12 +21,11 @@ export default function LoginPage() {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, loginAs }),
       })
       const data = await res.json()
       if (!res.ok) { setError(data.error); return }
-      const role = (data.user?.role ?? 'user') as UserRole
-      router.push(homePathForRole(role))
+      router.push(data.redirectTo ?? (loginAs === 'admin' ? '/admin' : '/dashboard'))
       router.refresh()
     } catch {
       setError('Something went wrong. Try again.')
@@ -33,6 +33,11 @@ export default function LoginPage() {
       setLoading(false)
     }
   }
+
+  const optionClass = (option: LoginAs) =>
+    loginAs === option
+      ? 'border-[#e8c97d] bg-[#e8c97d11] text-[#e8c97d]'
+      : 'border-white/10 text-gray-400 hover:border-white/20 hover:text-white'
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
@@ -42,11 +47,31 @@ export default function LoginPage() {
             ✨ Pragyan Events
           </span>
           <h1 className="text-2xl font-semibold">Welcome back</h1>
-          <p className="text-gray-400 text-sm mt-1">Sign in to schedule PI slots</p>
+          <p className="text-gray-400 text-sm mt-1">Sign in to the PI scheduler</p>
         </div>
 
         <div className="bg-[#1a1a2e] border border-white/10 rounded-2xl p-6">
           <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-xs text-gray-400 mb-2">Login as</label>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setLoginAs('user')}
+                  className={`text-sm border rounded-lg py-2.5 transition-colors ${optionClass('user')}`}
+                >
+                  User
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setLoginAs('admin')}
+                  className={`text-sm border rounded-lg py-2.5 transition-colors ${optionClass('admin')}`}
+                >
+                  Admin
+                </button>
+              </div>
+            </div>
+
             <div>
               <label className="block text-xs text-gray-400 mb-1.5">Email</label>
               <input
@@ -75,7 +100,7 @@ export default function LoginPage() {
               disabled={loading}
               className="w-full bg-[#e8c97d] text-[#0f0f1a] font-semibold rounded-lg py-2.5 text-sm hover:bg-[#f0d898] transition-colors disabled:opacity-60"
             >
-              {loading ? 'Signing in…' : 'Sign in'}
+              {loading ? 'Signing in…' : loginAs === 'admin' ? 'Sign in as Admin' : 'Sign in as User'}
             </button>
           </form>
           <p className="text-center text-xs text-gray-500 mt-4">

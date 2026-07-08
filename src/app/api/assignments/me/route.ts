@@ -1,14 +1,14 @@
 import { NextResponse } from 'next/server'
 import { getSession } from '@/lib/auth'
 import { supabase } from '@/lib/db'
+import { toDateKey } from '@/lib/types'
 
 export async function GET() {
   const session = await getSession()
   if (!session) return NextResponse.json({ error: 'Unauthorized.' }, { status: 401 })
 
   const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  const todayKey = today.toISOString().slice(0, 10)
+  const todayKey = toDateKey(today.getFullYear(), today.getMonth() + 1, today.getDate())
 
   const { data: assignments, error } = await supabase
     .from('pi_assignments')
