@@ -1,6 +1,7 @@
 'use client'
 
 import { useRouter, usePathname } from 'next/navigation'
+import { APP_NAME, APP_TAGLINE } from '@/lib/branding'
 
 interface Props {
   userName: string
@@ -36,8 +37,8 @@ export default function AppShell({ userName, isAdmin = false, children }: Props)
     <div className="min-h-screen flex">
       <aside className="hidden md:flex md:flex-col md:w-56 lg:w-60 fixed inset-y-0 left-0 bg-[#12121f] border-r border-white/10 z-20">
         <div className="px-5 pt-6 pb-4 border-b border-white/5">
-          <p className="text-[10px] text-gray-500 uppercase tracking-[0.2em]">Pragyan Events</p>
-          <p className="text-sm font-semibold text-white mt-1">PI Scheduler</p>
+          <p className="text-[10px] text-gray-500 uppercase tracking-[0.2em]">{APP_NAME}</p>
+          <p className="text-sm font-semibold text-white mt-1">{APP_TAGLINE}</p>
         </div>
 
         <nav className="flex-1 px-3 py-4 space-y-1">
@@ -87,8 +88,8 @@ export default function AppShell({ userName, isAdmin = false, children }: Props)
       {/* Mobile top bar */}
       <div className="md:hidden fixed top-0 inset-x-0 z-20 bg-[#12121f] border-b border-white/10 px-4 py-3 flex items-center justify-between">
         <div>
-          <p className="text-[10px] text-gray-500 uppercase tracking-widest">Pragyan Events</p>
-          <p className="text-sm font-semibold">PI Scheduler</p>
+          <p className="text-[10px] text-gray-500 uppercase tracking-widest">{APP_NAME}</p>
+          <p className="text-sm font-semibold">{APP_TAGLINE}</p>
         </div>
         <div className="flex items-center gap-2">
           <button

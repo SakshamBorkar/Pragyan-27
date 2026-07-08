@@ -7,19 +7,22 @@
     "build": "next build",
     "start": "next start",
     "db:migrate": "node scripts/run-migrations.js",
-    "db:check": "node scripts/check-db.js"
+    "db:check": "node scripts/check-db.js",
+    "test:smtp": "node scripts/test-smtp.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.44.4",
     "bcryptjs": "^2.4.3",
     "jose": "^5.6.3",
     "next": "14.2.5",
+    "nodemailer": "^6.9.14",
     "react": "^18",
     "react-dom": "^18"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "^20",
+    "@types/nodemailer": "^6.4.15",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "autoprefixer": "^10",

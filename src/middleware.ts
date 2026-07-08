@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyToken, COOKIE_NAME, isAdmin } from '@/lib/auth'
 
-const PUBLIC_PATHS = ['/login', '/register', '/api/auth/login', '/api/auth/register']
+const PUBLIC_PATHS = ['/', '/login', '/register', '/api/auth/login', '/api/auth/register', '/api/auth/send-otp']
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
@@ -14,7 +14,7 @@ export async function middleware(req: NextRequest) {
   const session = token ? await verifyToken(token) : null
 
   if (!session) {
-    return NextResponse.redirect(new URL('/login', req.url))
+    return NextResponse.redirect(new URL('/', req.url))
   }
 
   if (pathname.startsWith('/admin') || pathname.startsWith('/api/admin')) {

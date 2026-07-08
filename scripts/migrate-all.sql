@@ -29,3 +29,14 @@ CREATE INDEX IF NOT EXISTS idx_pi_assignments_user ON pi_assignments (user_id);
 UPDATE pi_assignments
 SET assigned_by = (SELECT id FROM users WHERE role = 'admin' ORDER BY id LIMIT 1)
 WHERE assigned_by IS NULL;
+
+CREATE TABLE IF NOT EXISTS email_otps (
+  id         BIGSERIAL PRIMARY KEY,
+  email      TEXT        NOT NULL,
+  otp_hash   TEXT        NOT NULL,
+  expires_at TIMESTAMPTZ NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_email_otps_email ON email_otps (email);
+CREATE INDEX IF NOT EXISTS idx_email_otps_expires ON email_otps (expires_at);

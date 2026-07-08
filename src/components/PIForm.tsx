@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 
 import { formatAllottedDate } from '@/lib/types'
+import { APP_NAME } from '@/lib/branding'
 
 interface Props {
   piNumber: 1 | 2
@@ -53,7 +54,7 @@ function formatTime(t: string): string {
 }
 
 function buildMessage(piNumber: number, date: string, time: string, venue: string): string {
-  return `Greetings from Pragyan Events Team ${SPARKLES}${SPARKLES}${SPARKLES}
+  return `Greetings from ${APP_NAME} Team ${SPARKLES}${SPARKLES}${SPARKLES}
 
 Your PI-${piNumber} will be conducted on:
 Date:${formatDate(date)}

@@ -1,8 +1,9 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import { APP_NAME, APP_TAGLINE } from '@/lib/branding'
 
 export const metadata: Metadata = {
-  title: 'Pragyan PI Scheduler',
+  title: `${APP_NAME} · ${APP_TAGLINE}`,
   description: 'Schedule PI slots and send WhatsApp confirmations',
 }
 

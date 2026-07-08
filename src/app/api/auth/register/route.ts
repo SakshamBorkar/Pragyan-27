@@ -2,27 +2,69 @@ import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { supabase } from '@/lib/db'
 import { signToken, COOKIE_NAME, normalizeRole } from '@/lib/auth'
+import { isValidEmail, isOtpExpired, normalizeEmail, verifyOtpCode } from '@/lib/otp'
+
+async function verifyEmailOtp(email: string, otp: string): Promise<boolean> {
+  const { data: rows, error } = await supabase
+    .from('email_otps')
+    .select('id, otp_hash, expires_at')
+    .eq('email', email)
+    .order('created_at', { ascending: false })
+    .limit(5)
+
+  if (error) {
+    console.error(error)
+    return false
+  }
+
+  for (const row of rows ?? []) {
+    if (isOtpExpired(row.expires_at as string)) continue
+    const valid = await verifyOtpCode(otp, row.otp_hash as string)
+    if (valid) {
+      await supabase.from('email_otps').delete().eq('email', email)
+      return true
+    }
+  }
+
+  return false
+}
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { name, email, password, role: requestedRole } = body
+    const { name, email: rawEmail, password, otp, role: requestedRole } = body
 
     if (requestedRole === 'admin') {
       return NextResponse.json({ error: 'Admin accounts cannot be created via registration.' }, { status: 403 })
     }
 
-    if (!name || !email || !password) {
-      return NextResponse.json({ error: 'All fields are required.' }, { status: 400 })
+    if (!name || !rawEmail || !password || !otp) {
+      return NextResponse.json({ error: 'All fields including verification code are required.' }, { status: 400 })
     }
+
+    if (!isValidEmail(rawEmail)) {
+      return NextResponse.json({ error: 'Enter a valid email address.' }, { status: 400 })
+    }
+
+    const email = normalizeEmail(rawEmail)
+
+    if (!/^\d{6}$/.test(String(otp).trim())) {
+      return NextResponse.json({ error: 'Enter the 6-digit verification code from your email.' }, { status: 400 })
+    }
+
     if (password.length < 6) {
       return NextResponse.json({ error: 'Password must be at least 6 characters.' }, { status: 400 })
+    }
+
+    const otpValid = await verifyEmailOtp(email, String(otp).trim())
+    if (!otpValid) {
+      return NextResponse.json({ error: 'Invalid or expired verification code.' }, { status: 400 })
     }
 
     const { data: existing } = await supabase
       .from('users')
       .select('id')
-      .eq('email', email.toLowerCase())
+      .eq('email', email)
       .maybeSingle()
 
     if (existing) {
@@ -33,7 +75,7 @@ export async function POST(req: NextRequest) {
 
     const { data: user, error } = await supabase
       .from('users')
-      .insert({ name, email: email.toLowerCase(), password: hashed, role: 'user' })
+      .insert({ name, email, password: hashed, role: 'user' })
       .select('id, name, email, role')
       .single()
 

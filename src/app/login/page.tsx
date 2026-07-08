@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import type { LoginAs } from '@/lib/types'
 import PasswordInput from '@/components/PasswordInput'
+import { APP_NAME } from '@/lib/branding'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -44,8 +45,11 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
+          <Link href="/" className="inline-flex items-center gap-1 text-xs text-gray-500 hover:text-gray-300 transition-colors mb-4">
+            ← Back to home
+          </Link>
           <span className="inline-block bg-[#1a1a2e] border border-[#e8c97d33] text-[#e8c97d] px-5 py-2 rounded-full text-sm font-medium tracking-wide mb-4">
-            ✨ Pragyan Events
+            ✨ {APP_NAME}
           </span>
           <h1 className="text-2xl font-semibold">Welcome back</h1>
           <p className="text-gray-400 text-sm mt-1">Sign in to the PI scheduler</p>
