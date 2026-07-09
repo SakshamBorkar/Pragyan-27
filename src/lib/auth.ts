@@ -49,10 +49,29 @@ export async function verifyToken(token: string): Promise<SessionPayload | null>
 }
 
 export async function getSession(): Promise<SessionPayload | null> {
-  const cookieStore = cookies()
-  const token = cookieStore.get(COOKIE_NAME)?.value
-  if (!token) return null
-  return verifyToken(token)
+  try {
+    const cookieStore = cookies()
+    let token = cookieStore.get(COOKIE_NAME)?.value
+
+    // Capacitor mobile clients send the JWT via Authorization header
+    if (!token) {
+      try {
+        const { headers: headersFn } = await import('next/headers')
+        const hdrs = headersFn()
+        const auth = hdrs.get('authorization') || ''
+        if (auth.startsWith('Bearer ')) {
+          token = auth.slice(7)
+        }
+      } catch {
+        // headers() not available outside request context
+      }
+    }
+
+    if (!token) return null
+    return verifyToken(token)
+  } catch {
+    return null
+  }
 }
 
 export function isAdmin(session: SessionPayload | null): boolean {

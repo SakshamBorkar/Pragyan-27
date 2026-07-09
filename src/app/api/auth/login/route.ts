@@ -39,6 +39,7 @@ export async function POST(req: NextRequest) {
     const token = await signToken({ userId: user.id, name: user.name, email: user.email, role })
 
     const res = NextResponse.json({
+      token,
       user: { name: user.name, email: user.email, role },
       loginAs,
       redirectTo: loginAs === 'admin' ? '/admin' : '/dashboard',

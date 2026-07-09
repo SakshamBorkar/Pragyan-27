@@ -87,7 +87,7 @@ export async function POST(req: NextRequest) {
     const role = normalizeRole(user.role)
     const token = await signToken({ userId: user.id, name: user.name, email: user.email, role })
 
-    const res = NextResponse.json({ user: { name: user.name, email: user.email, role } })
+    const res = NextResponse.json({ token, user: { name: user.name, email: user.email, role } })
     res.cookies.set(COOKIE_NAME, token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',

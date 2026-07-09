@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import PasswordInput from '@/components/PasswordInput'
 import { APP_NAME } from '@/lib/branding'
+import { getApiUrl } from '@/lib/utils'
 
 const RESEND_COOLDOWN_SEC = 60
 
@@ -38,7 +39,7 @@ export default function RegisterPage() {
 
     setSendingOtp(true)
     try {
-      const res = await fetch('/api/auth/send-otp', {
+      const res = await fetch(getApiUrl('/api/auth/send-otp'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
@@ -81,7 +82,7 @@ export default function RegisterPage() {
 
     setLoading(true)
     try {
-      const res = await fetch('/api/auth/register', {
+      const res = await fetch(getApiUrl('/api/auth/register'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, password, otp: otp.trim() }),
@@ -91,6 +92,7 @@ export default function RegisterPage() {
         setError(data.error ?? 'Registration failed.')
         return
       }
+      if (data.token) localStorage.setItem('pragyan_session', data.token)
       router.push('/dashboard')
       router.refresh()
     } catch {

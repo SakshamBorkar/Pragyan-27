@@ -1,5 +1,10 @@
 .next/
+out/
 node_modules/
 .env.local
 *.log
 .DS_Store
+
+# Capacitor
+android/app/build/
+ios/App/Pods/

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import AppShell from './AppShell'
 import ScheduleCalendar from './ScheduleCalendar'
 import type { UserRecord, UserRole } from '@/lib/types'
+import { authFetch, getApiUrl } from '@/lib/utils'
 
 interface Props {
   userName: string
@@ -31,7 +32,7 @@ export default function AdminClient({ userName, currentUserId }: Props) {
     setError('')
     setLoading(true)
     try {
-      const res = await fetch('/api/admin/users')
+      const res = await authFetch(getApiUrl('/api/admin/users'))
       const data = await res.json()
       if (!res.ok) {
         setError(data.error ?? 'Failed to load users.')
@@ -53,7 +54,7 @@ export default function AdminClient({ userName, currentUserId }: Props) {
     setBusyId(userId)
     setError('')
     try {
-      const res = await fetch('/api/admin/users', {
+      const res = await authFetch(getApiUrl('/api/admin/users'), {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId, role }),
@@ -77,7 +78,11 @@ export default function AdminClient({ userName, currentUserId }: Props) {
     setBusyId(userId)
     setError('')
     try {
-      const res = await fetch(`/api/admin/users/${userId}`, { method: 'DELETE' })
+      const res = await authFetch(getApiUrl('/api/admin/users'), {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId }),
+      })
       const data = await res.json()
       if (!res.ok) {
         setError(data.error ?? 'Failed to delete user.')

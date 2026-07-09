@@ -6,6 +6,7 @@ import PIForm from './PIForm'
 import AssignedDatesPanel from './AssignedDatesPanel'
 import SchedulingCompletionPanel from './SchedulingCompletionPanel'
 import type { UserAssignment } from '@/lib/types'
+import { authFetch, getApiUrl } from '@/lib/utils'
 
 interface Props {
   userName: string
@@ -21,7 +22,7 @@ export default function DashboardClient({ userName, isAdmin = false }: Props) {
     if (isAdmin) return
     setLoadingDates(true)
     try {
-      const res = await fetch('/api/assignments/me')
+      const res = await authFetch(getApiUrl('/api/assignments/me'))
       const data = await res.json()
       if (res.ok) setAssignments(data.assignments ?? [])
     } finally {

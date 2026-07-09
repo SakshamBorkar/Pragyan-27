@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { formatAllottedDate, formatDateTime, type UserAssignment } from '@/lib/types'
+import { authFetch, getApiUrl } from '@/lib/utils'
 
 interface Props {
   assignments: UserAssignment[]
@@ -35,7 +36,7 @@ export default function SchedulingCompletionPanel({
     setError('')
     setNotice('')
     try {
-      const res = await fetch('/api/assignments/me', {
+      const res = await authFetch(getApiUrl('/api/assignments/me'), {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ date: selectedDate, piNumber }),

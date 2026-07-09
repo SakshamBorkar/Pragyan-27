@@ -2,6 +2,7 @@
 
 import { useRouter, usePathname } from 'next/navigation'
 import { APP_NAME, APP_TAGLINE } from '@/lib/branding'
+import { authFetch, getApiUrl } from '@/lib/utils'
 
 interface Props {
   userName: string
@@ -21,7 +22,8 @@ export default function AppShell({ userName, isAdmin = false, children }: Props)
     .slice(0, 2)
 
   async function handleLogout() {
-    await fetch('/api/auth/logout', { method: 'POST' })
+    await authFetch(getApiUrl('/api/auth/logout'), { method: 'POST' })
+    localStorage.removeItem('pragyan_session')
     router.push('/login')
     router.refresh()
   }

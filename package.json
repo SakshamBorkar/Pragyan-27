@@ -5,12 +5,16 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:mobile": "cross-env IS_CAPACITOR=true next build",
     "start": "next start",
     "db:migrate": "node scripts/run-migrations.js",
     "db:check": "node scripts/check-db.js",
     "test:smtp": "node scripts/test-smtp.js"
   },
   "dependencies": {
+    "@capacitor/android": "^7.2.0",
+    "@capacitor/core": "^7.2.0",
+    "@capacitor/ios": "^7.2.0",
     "@supabase/supabase-js": "^2.44.4",
     "bcryptjs": "^2.4.3",
     "jose": "^5.6.3",
@@ -20,12 +24,14 @@
     "react-dom": "^18"
   },
   "devDependencies": {
+    "@capacitor/cli": "^7.2.0",
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "^20",
     "@types/nodemailer": "^6.4.15",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "autoprefixer": "^10",
+    "cross-env": "^10.1.0",
     "pg": "^8.22.0",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",

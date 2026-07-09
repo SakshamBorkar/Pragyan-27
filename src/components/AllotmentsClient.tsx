@@ -8,6 +8,7 @@ import {
   toDateKey,
   type AllotmentUser,
 } from '@/lib/types'
+import { authFetch, getApiUrl } from '@/lib/utils'
 
 interface Props {
   userName: string
@@ -32,7 +33,7 @@ export default function AllotmentsClient({ userName, isAdmin = false, currentUse
     setLoading(true)
     setError('')
     try {
-      const res = await fetch(`/api/assignments/allotments?year=${viewYear}&month=${viewMonth}`)
+      const res = await authFetch(getApiUrl(`/api/assignments/allotments?year=${viewYear}&month=${viewMonth}`))
       const data = await res.json()
       if (!res.ok) {
         setError(data.error ?? 'Failed to load allotments.')

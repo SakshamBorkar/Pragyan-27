@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { AssignedUserStatus, UserRecord } from '@/lib/types'
 import { formatDisplayDate, toDateKey, formatDateTime } from '@/lib/types'
+import { authFetch, getApiUrl } from '@/lib/utils'
 
 interface DayAssignments {
   userIds: number[]
@@ -53,7 +54,7 @@ export default function ScheduleCalendar({ users }: Props) {
     setLoading(true)
     setError('')
     try {
-      const res = await fetch(`/api/admin/assignments?year=${viewYear}&month=${viewMonth}`)
+      const res = await authFetch(getApiUrl(`/api/admin/assignments?year=${viewYear}&month=${viewMonth}`))
       const data = await res.json()
       if (!res.ok) {
         setError(data.error ?? 'Failed to load schedule.')
@@ -95,7 +96,7 @@ export default function ScheduleCalendar({ users }: Props) {
     setError('')
     setNotice('')
     try {
-      const res = await fetch('/api/admin/assignments', {
+      const res = await authFetch(getApiUrl('/api/admin/assignments'), {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ date: selectedDate, userIds: selectedUserIds }),

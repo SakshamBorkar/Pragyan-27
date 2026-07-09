@@ -6,6 +6,7 @@ import Link from 'next/link'
 import type { LoginAs } from '@/lib/types'
 import PasswordInput from '@/components/PasswordInput'
 import { APP_NAME } from '@/lib/branding'
+import { getApiUrl } from '@/lib/utils'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -20,13 +21,14 @@ export default function LoginPage() {
     setError('')
     setLoading(true)
     try {
-      const res = await fetch('/api/auth/login', {
+      const res = await fetch(getApiUrl('/api/auth/login'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password, loginAs }),
       })
       const data = await res.json()
       if (!res.ok) { setError(data.error); return }
+      if (data.token) localStorage.setItem('pragyan_session', data.token)
       router.push(data.redirectTo ?? (loginAs === 'admin' ? '/admin' : '/dashboard'))
       router.refresh()
     } catch {
