@@ -46,9 +46,12 @@ export default function LandingPage() {
     <div className="min-h-screen">
       <header className="border-b border-white/5">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-5 flex items-center justify-between gap-4">
-          <div>
-            <p className="text-[10px] text-gray-500 uppercase tracking-[0.2em]">{APP_NAME}</p>
-            <p className="text-sm font-semibold mt-0.5">{APP_TAGLINE}</p>
+          <div className="flex items-center gap-3">
+            <img src="/logo.png" alt="Logo" className="w-9 h-9 object-contain rounded-lg shrink-0" />
+            <div className="min-w-0">
+              <p className="text-[10px] text-gray-500 uppercase tracking-[0.2em] truncate">{APP_NAME}</p>
+              <p className="text-xs font-semibold text-white truncate mt-0.5">{APP_TAGLINE}</p>
+            </div>
           </div>
           <div className="flex items-center gap-2 sm:gap-3">
             <Link
@@ -69,9 +72,11 @@ export default function LandingPage() {
 
       <main className="max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
         <section className="text-center max-w-2xl mx-auto mb-16 sm:mb-20">
-          <span className="inline-block bg-[#1a1a2e] border border-[#e8c97d33] text-[#e8c97d] px-5 py-2 rounded-full text-sm font-medium tracking-wide mb-6">
-            ✨ {APP_NAME}
-          </span>
+          <img
+            src="/logo.png"
+            alt={APP_NAME}
+            className="h-20 w-auto mx-auto mb-6 object-contain rounded-2xl"
+          />
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-tight mb-4">
             Schedule Pragyan Events PI{' '}
             <span className="text-[#e8c97d]">effortlessly</span>
