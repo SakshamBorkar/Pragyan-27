@@ -137,28 +137,28 @@ export default function ScheduleCalendar({ users }: Props) {
         Click a date to assign team members who can schedule PI slots on that day.
       </p>
 
-      <div className="bg-[#1a1a2e] border border-white/10 rounded-2xl p-5">
+      <div className="bg-[#1a1a2e] border border-white/10 rounded-2xl p-3 sm:p-5">
         <div className="flex items-center justify-between mb-5">
           <button
             onClick={() => shiftMonth(-1)}
-            className="text-sm text-gray-400 hover:text-white px-3 py-1.5 border border-white/10 rounded-lg"
+            className="text-xs sm:text-sm text-gray-400 hover:text-white px-2.5 py-1.5 border border-white/10 rounded-lg"
           >
             ← Prev
           </button>
-          <h2 className="text-sm font-semibold">
+          <h2 className="text-xs sm:text-sm font-semibold">
             {MONTHS[viewMonth - 1]} {viewYear}
           </h2>
           <button
             onClick={() => shiftMonth(1)}
-            className="text-sm text-gray-400 hover:text-white px-3 py-1.5 border border-white/10 rounded-lg"
+            className="text-xs sm:text-sm text-gray-400 hover:text-white px-2.5 py-1.5 border border-white/10 rounded-lg"
           >
             Next →
           </button>
         </div>
 
-        <div className="grid grid-cols-7 gap-2 mb-2">
+        <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-2">
           {WEEKDAYS.map(day => (
-            <div key={day} className="text-center text-[10px] text-gray-500 uppercase tracking-wider py-1">
+            <div key={day} className="text-center text-[9px] sm:text-[10px] text-gray-500 uppercase tracking-wider py-1">
               {day}
             </div>
           ))}
@@ -167,7 +167,7 @@ export default function ScheduleCalendar({ users }: Props) {
         {loading ? (
           <p className="text-sm text-gray-500 py-8 text-center">Loading calendar…</p>
         ) : (
-          <div className="grid grid-cols-7 gap-2">
+          <div className="grid grid-cols-7 gap-1 sm:gap-2">
             {calendarCells.map((cell, i) => {
               if (!cell) return <div key={`empty-${i}`} />
               const dayData = assignments[cell.dateKey]
@@ -180,7 +180,7 @@ export default function ScheduleCalendar({ users }: Props) {
                 <button
                   key={cell.dateKey}
                   onClick={() => openDate(cell.dateKey)}
-                  className={`min-h-[72px] rounded-xl border p-2 text-left transition-all ${
+                  className={`min-h-[48px] sm:min-h-[72px] rounded-lg sm:rounded-xl border p-1 sm:p-2 text-left transition-all ${
                     isSelected
                       ? 'border-[#e8c97d] bg-[#e8c97d11]'
                       : isToday
@@ -188,15 +188,15 @@ export default function ScheduleCalendar({ users }: Props) {
                         : 'border-white/10 hover:border-white/20 hover:bg-[#1e1e35]'
                   }`}
                 >
-                  <div className="text-sm font-medium">{cell.day}</div>
+                  <div className="text-xs sm:text-sm font-medium">{cell.day}</div>
                   {count > 0 && (
-                    <div className="mt-2 space-y-1">
-                      <span className="inline-block text-[10px] bg-[#e8c97d22] text-[#e8c97d] border border-[#e8c97d44] rounded-full px-2 py-0.5">
-                        {count} user{count !== 1 ? 's' : ''}
+                    <div className="mt-1 sm:mt-2 flex flex-col gap-1">
+                      <span className="inline-block text-[9px] sm:text-[10px] bg-[#e8c97d22] text-[#e8c97d] border border-[#e8c97d44] rounded-full px-1 sm:px-2 py-0.5 text-center min-w-[18px] w-fit">
+                        {count}<span className="hidden sm:inline"> user{count !== 1 ? 's' : ''}</span>
                       </span>
                       {done > 0 && (
-                        <span className="block text-[10px] bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 rounded-full px-2 py-0.5 w-fit">
-                          {done}/{count} done
+                        <span className="inline-block text-[9px] sm:text-[10px] bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 rounded-full px-1 sm:px-2 py-0.5 w-fit text-center min-w-[18px]">
+                          {done}<span className="hidden sm:inline">/{count} done</span>
                         </span>
                       )}
                     </div>

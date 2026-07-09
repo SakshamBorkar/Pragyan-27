@@ -88,12 +88,12 @@ export default function AppShell({ userName, isAdmin = false, children }: Props)
       </aside>
 
       {/* Mobile top bar */}
-      <div className="md:hidden fixed top-0 inset-x-0 z-20 bg-[#12121f] border-b border-white/10 px-4 py-3 flex items-center justify-between">
-        <div>
-          <p className="text-[10px] text-gray-500 uppercase tracking-widest">{APP_NAME}</p>
-          <p className="text-sm font-semibold">{APP_TAGLINE}</p>
+      <div className="md:hidden fixed top-0 inset-x-0 z-20 bg-[#12121f] border-b border-white/10 px-3 py-3 flex items-center justify-between gap-2">
+        <div className="min-w-0 flex-shrink">
+          <p className="text-[9px] text-gray-500 uppercase tracking-widest truncate">{APP_NAME}</p>
+          <p className="text-xs font-semibold truncate">{APP_TAGLINE}</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 flex-shrink-0">
           <button
             onClick={() => router.push('/dashboard')}
             className={`text-xs border rounded-lg px-2.5 py-1.5 transition-colors ${navLinkClass('/dashboard')}`}
