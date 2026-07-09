@@ -22,7 +22,19 @@ function normalizePhone(phone: string): string {
 
 function buildWhatsAppUrl(phone: string, text: string): string {
   const normalized = text.normalize('NFC')
-  return `https://web.whatsapp.com/send?phone=${normalizePhone(phone)}&text=${encodeURIComponent(normalized)}`
+  const cleanPhone = normalizePhone(phone)
+
+  if (typeof window !== 'undefined') {
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+    const isCapacitor = (window as any).Capacitor
+
+    if (isMobile || isCapacitor) {
+      return `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(normalized)}`
+    }
+  }
+
+  // Web app (desktop) -> use WhatsApp Web link directly
+  return `https://web.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(normalized)}`
 }
 
 function formatDate(d: string): string {
@@ -118,8 +130,17 @@ export default function PIForm({
       // Clipboard may be blocked; WhatsApp Web URL still opens with the text.
     }
 
+    const isMobile = typeof window !== 'undefined' && (
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+      (window as any).Capacitor
+    )
+
     window.open(buildWhatsAppUrl(phone, normalized), '_blank', 'noopener,noreferrer')
-    setNotice('Opened WhatsApp Web. Mark scheduling as completed in the panel on the right when done.')
+    setNotice(
+      isMobile
+        ? 'Opened WhatsApp. Mark scheduling as completed in the panel on the right when done.'
+        : 'Opened WhatsApp Web. Mark scheduling as completed in the panel on the right when done.'
+    )
   }
 
   const formCard = (
