@@ -1,14 +1,53 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyToken, COOKIE_NAME, isAdmin } from '@/lib/auth'
 
-const PUBLIC_PATHS = ['/', '/login', '/register', '/api/auth/login', '/api/auth/register', '/api/auth/send-otp']
-
-// Origins allowed for Capacitor webviews
-const ALLOWED_ORIGINS = [
-  'http://localhost',
-  'capacitor://localhost',
-  'https://localhost',
+const PUBLIC_PATHS = [
+  '/',
+  '/login',
+  '/register',
+  '/api/auth/login',
+  '/api/auth/register',
+  '/api/auth/send-otp',
+  '/api/auth/me',
+  '/api/auth/logout',
 ]
+
+function isAllowedOrigin(origin: string | null): boolean {
+  if (!origin) return false
+
+  // Strict check for allowed static origins or local hosts with ports
+  const allowed = [
+    'http://localhost',
+    'capacitor://localhost',
+    'https://localhost',
+  ]
+  if (allowed.some(o => origin === o || origin.startsWith(o + ':'))) return true
+
+  try {
+    const url = new URL(origin)
+    const hostname = url.hostname
+
+    // Allow localhost/127.0.0.1 loopback
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+      return true
+    }
+
+    // Allow private network IPs for mobile testing (e.g. 192.168.x.x, 10.x.x.x)
+    const isPrivateIp =
+      /^10\.\d+\.\d+\.\d+$/.test(hostname) ||
+      /^192\.168\.\d+\.\d+$/.test(hostname) ||
+      /^172\.(1[6-9]|2\d|3[01])\.\d+\.\d+$/.test(hostname)
+
+    if (isPrivateIp) return true
+
+    // Allow capacitor custom scheme
+    if (url.protocol === 'capacitor:') return true
+  } catch {
+    // Invalid URL format
+  }
+
+  return false
+}
 
 function getCorsHeaders(origin: string | null) {
   const headers: Record<string, string> = {
@@ -17,7 +56,7 @@ function getCorsHeaders(origin: string | null) {
     'Access-Control-Allow-Credentials': 'true',
   }
 
-  if (origin && ALLOWED_ORIGINS.some(o => origin.startsWith(o))) {
+  if (origin && isAllowedOrigin(origin)) {
     headers['Access-Control-Allow-Origin'] = origin
   }
 
@@ -89,5 +128,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/allotments/:path*', '/admin/:path*', '/api/admin/:path*', '/api/assignments/:path*', '/api/pi/:path*'],
+  matcher: ['/dashboard/:path*', '/allotments/:path*', '/admin/:path*', '/api/:path*'],
 }

@@ -10,11 +10,17 @@
 export function getApiUrl(path: string): string {
   let cleanPath = path.startsWith('/') ? path : `/${path}`
 
+  // Separate path and query parameters so the trailing slash isn't appended at the end of query parameters
+  const [pathPart, queryPart] = cleanPath.split('?')
+  let modifiedPath = pathPart
+
   // Next.js trailingSlash causes redirects on API paths, which breaks CORS
   // preflights. Append a trailing slash to avoid the redirect.
-  if (cleanPath.startsWith('/api/') && !cleanPath.endsWith('/')) {
-    cleanPath = `${cleanPath}/`
+  if (modifiedPath.startsWith('/api/') && !modifiedPath.endsWith('/')) {
+    modifiedPath = `${modifiedPath}/`
   }
+
+  cleanPath = queryPart ? `${modifiedPath}?${queryPart}` : modifiedPath
 
   if (typeof window !== 'undefined') {
     // Detect Capacitor webviews (Android / iOS)
