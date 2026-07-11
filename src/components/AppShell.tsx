@@ -59,6 +59,18 @@ export default function AppShell({ userName, isAdmin = false, children }: Props)
           >
             Allotments
           </button>
+          <button
+            onClick={() => router.push('/inductions')}
+            className={`w-full text-left text-sm border rounded-lg px-3 py-2.5 transition-colors ${navLinkClass('/inductions')}`}
+          >
+            Inductions
+          </button>
+          <button
+            onClick={() => router.push('/pi-completed')}
+            className={`w-full text-left text-sm border rounded-lg px-3 py-2.5 transition-colors ${navLinkClass('/pi-completed')}`}
+          >
+            PI Completed
+          </button>
           {isAdmin && (
             <button
               onClick={() => router.push('/admin')}
@@ -111,6 +123,18 @@ export default function AppShell({ userName, isAdmin = false, children }: Props)
             className={`text-xs border rounded-lg px-2.5 py-1.5 transition-colors ${navLinkClass('/allotments')}`}
           >
             Allotments
+          </button>
+          <button
+            onClick={() => router.push('/inductions')}
+            className={`text-xs border rounded-lg px-2.5 py-1.5 transition-colors ${navLinkClass('/inductions')}`}
+          >
+            Inductions
+          </button>
+          <button
+            onClick={() => router.push('/pi-completed')}
+            className={`text-xs border rounded-lg px-2.5 py-1.5 transition-colors ${navLinkClass('/pi-completed')}`}
+          >
+            Completed
           </button>
           {isAdmin && (
             <button

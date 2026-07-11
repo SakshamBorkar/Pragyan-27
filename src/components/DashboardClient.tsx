@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import AppShell from './AppShell'
 import PIForm from './PIForm'
 import AssignedDatesPanel from './AssignedDatesPanel'
@@ -14,7 +15,16 @@ interface Props {
 }
 
 export default function DashboardClient({ userName, isAdmin = false }: Props) {
-  const [activePI, setActivePI] = useState<1 | 2 | null>(null)
+  const searchParams = useSearchParams()
+  const phoneParam = searchParams.get('phone') || ''
+  const piParam = searchParams.get('pi')
+  const rowParam = searchParams.get('row') || ''
+
+  const [activePI, setActivePI] = useState<1 | 2 | null>(() => {
+    if (piParam === '1') return 1
+    if (piParam === '2') return 2
+    return null
+  })
   const [assignments, setAssignments] = useState<UserAssignment[]>([])
   const [loadingDates, setLoadingDates] = useState(!isAdmin)
 
@@ -70,6 +80,8 @@ export default function DashboardClient({ userName, isAdmin = false }: Props) {
             assignedDates={isAdmin ? undefined : assignedDates}
             restrictToAssignedDates={!isAdmin}
             embedded
+            defaultPhone={phoneParam}
+            defaultRowIndex={rowParam ? parseInt(rowParam, 10) : undefined}
           />
           {completionSidebar}
         </div>

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 
 import { formatAllottedDate } from '@/lib/types'
 import { APP_NAME } from '@/lib/branding'
+import { authFetch, getApiUrl } from '@/lib/utils'
 
 interface Props {
   piNumber: 1 | 2
@@ -11,6 +12,8 @@ interface Props {
   assignedDates?: string[]
   restrictToAssignedDates?: boolean
   embedded?: boolean
+  defaultPhone?: string
+  defaultRowIndex?: number
 }
 
 const SPARKLES = '\u2728'
@@ -86,8 +89,16 @@ export default function PIForm({
   assignedDates = [],
   restrictToAssignedDates = false,
   embedded = false,
+  defaultPhone = '',
+  defaultRowIndex,
 }: Props) {
-  const [phone, setPhone] = useState('')
+  const [phone, setPhone] = useState(defaultPhone)
+
+  useEffect(() => {
+    if (defaultPhone) {
+      setPhone(defaultPhone)
+    }
+  }, [defaultPhone])
   const [date, setDate] = useState(restrictToAssignedDates && assignedDates.length === 1 ? assignedDates[0] : '')
   const [time, setTime] = useState('')
   const [venue, setVenue] = useState('')
@@ -141,6 +152,22 @@ export default function PIForm({
         ? 'Opened WhatsApp. Mark scheduling as completed in the panel on the right when done.'
         : 'Opened WhatsApp Web. Mark scheduling as completed in the panel on the right when done.'
     )
+
+    try {
+      await authFetch(getApiUrl('/api/inductions'), {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          rowIndex: defaultRowIndex,
+          phone,
+          date,
+          time,
+          venue,
+        }),
+      })
+    } catch (e) {
+      console.error('Failed to sync slot details with Google Sheet:', e)
+    }
   }
 
   const formCard = (

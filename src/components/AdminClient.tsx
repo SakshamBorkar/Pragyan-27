@@ -73,7 +73,7 @@ export default function AdminClient({ userName, currentUserId }: Props) {
   }
 
   async function deleteUser(userId: number, name: string) {
-    if (!confirm(`Delete ${name}? This cannot be undone.`)) return
+    if (typeof window !== 'undefined' && !window.confirm(`Delete ${name}? This cannot be undone.`)) return
 
     setBusyId(userId)
     setError('')

@@ -104,6 +104,7 @@ async function main() {
     readSql('add-completion.sql'),
     readSql('add-assigned-by.sql'),
     readSql('add-email-otps.sql'),
+    readSql('add-settings.sql'),
   ].filter(Boolean).join('\n\n')
   if (!sql) throw new Error('migrate-all.sql is empty')
 
