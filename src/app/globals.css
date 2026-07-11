@@ -11,3 +11,15 @@ input:-webkit-autofill:focus {
   -webkit-text-fill-color: #fff;
   transition: background-color 5000s ease-in-out 0s;
 }
+
+@media (max-width: 767px) {
+  .mobile-header-safe {
+    padding-top: calc(env(safe-area-inset-top, 0px) + 10px) !important;
+  }
+  .mobile-main-safe {
+    padding-top: calc(env(safe-area-inset-top, 0px) + 64px) !important;
+  }
+  .mobile-button-safe {
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 16px) !important;
+  }
+}

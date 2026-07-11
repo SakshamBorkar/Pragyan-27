@@ -103,7 +103,7 @@ export default function AppShell({ userName, isAdmin = false, children }: Props)
       </aside>
 
       {/* Mobile top bar */}
-      <div className="md:hidden fixed top-0 inset-x-0 z-20 bg-[#12121f] border-b border-white/10 px-3 py-2.5 flex items-center justify-between gap-2">
+      <div className="md:hidden fixed top-0 inset-x-0 z-20 bg-[#12121f] border-b border-white/10 px-3 py-2.5 flex items-center justify-between gap-2 mobile-header-safe">
         <div className="flex items-center gap-2 min-w-0">
           <img src="/logo.png" alt="Logo" className="w-7 h-7 object-contain rounded-md shrink-0" />
           <div className="min-w-0">
@@ -150,12 +150,12 @@ export default function AppShell({ userName, isAdmin = false, children }: Props)
       {/* Mobile bottom-left sign out */}
       <button
         onClick={handleLogout}
-        className="md:hidden fixed bottom-4 left-4 z-20 text-xs text-gray-400 border border-white/10 bg-[#12121f] rounded-lg px-4 py-2.5 hover:text-white hover:border-white/20 transition-colors shadow-lg"
+        className="md:hidden fixed bottom-4 left-4 z-20 text-xs text-gray-400 border border-white/10 bg-[#12121f] rounded-lg px-4 py-2.5 hover:text-white hover:border-white/20 transition-colors shadow-lg mobile-button-safe"
       >
         Sign out
       </button>
 
-      <main className="flex-1 md:ml-56 lg:ml-60 pt-16 md:pt-0 pb-20 md:pb-0 min-h-screen">
+      <main className="flex-1 md:ml-56 lg:ml-60 pt-16 md:pt-0 pb-20 md:pb-0 min-h-screen mobile-main-safe">
         <div className="px-4 py-6 sm:px-6 lg:px-8 lg:py-8 max-w-6xl">
           {children}
         </div>
